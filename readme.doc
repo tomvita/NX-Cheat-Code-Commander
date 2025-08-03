@@ -11,7 +11,7 @@ This guide will walk you through every aspect of the tool, from its core feature
 Here’s a simple workflow to get you started with Cheat Code Commander:
 
 1.  **Open a Cheat File:**
-    *   **Drag and Drop:** The easiest way is to drag your cheat file and drop it onto the left (Assembler) or center (Opcodes) panel.
+    *   **Drag and Drop:** The easiest way is to drag your cheat file (`.txt`, `.asm`) and drop it onto the left (Assembler) or center (Opcodes) panel.
     *   **Open File Button:** Click "Open ASM File" to load your cheat source code, or "Open Opcodes File" to load raw opcodes.
 2.  **Write or Edit a Cheat:** In the assembler panel (left), write a new cheat or modify an existing one. As you type, the center panel will update with the raw opcodes.
 3.  **Disassemble a Cheat:** Paste a raw cheat code into the center panel. The disassembler (right panel) will automatically show you the human-readable version.
@@ -71,32 +71,22 @@ Writes a static value to a memory address. The assembler can also interpret the 
 [Main+R0+0x123462] = .float 3.14
 ```
 
-#### Pointer Auto-Increment (Store with Post-Increment)
+#### Pointer Auto-Increment for Register-Based Static Writes
 
-The assembler supports an auto-increment feature for memory writes where the source register used as a pointer is incremented after the write operation. This is useful for writing sequential data in a loop.
+When writing a static value to a memory address pointed to by a register (e.g., `[R10]`), the assembler provides flexible ways to auto-increment the pointer after the write operation.
 
-**Assembler Syntax:**
-
-To use this feature, append an exclamation mark (`!`) to the closing bracket of the address.
-
-```
-[R<d>]! = <Value>
-[R<d>]! = R<s>
-```
-
--   **`[R<d>]!`**: This syntax writes the value (either a static `<Value>` or the value from a source register `R<s>`) to the address pointed to by `R<d>`. After the write, the register `R<d>` is incremented by the width of the operation (e.g., 4 bytes for a 32-bit value, 8 bytes for a 64-bit value).
+-   **`R<n>+`**: Appending a `+` to the register in the address part increments that register by the operation's bit-width.
+-   **`R<n> += <value>`**: An explicit increment value can be specified. The increment is only applied if `<value>` matches the operation's bit-width.
 
 **Example:**
 
 ```
-# This will write the value of R1 to the address in R0,
-# and then increment R0 by the write width.
-[R0]! = R1
+# Using R+ to increment R10 by 8
+[R10] = 0x1000000001000110 W=8 R10+
+
+# Using R += value to increment R10 by 4
+[R10] = 0x1234 W=4 R10 += 4
 ```
-
-**Disassembly Note:**
-
-Please note that while the assembler uses the `[R<n>]!` syntax, the disassembler may represent this post-increment operation differently, for example using `R<n>+` notation. This is a known inconsistency in representation between the two components.
 
 #### Conditional Blocks
 
@@ -235,58 +225,34 @@ The ASM Editor provides a focused environment for writing and editing ARM64 asse
 
 To simplify cheat reordering, you can use the **"Cut Cheat"** and **"Paste Cheat"** options in the context menu. This allows you to easily move entire cheat blocks within the assembler input.
 
-### Consolidating Cheats from Opcodes
-
-A powerful workflow for managing cheats from multiple sources is to convert them all into the assembler format. This allows you to edit, manage, and relocate them as a single, unified cheat file.
-
-1.  **Combine Opcodes:** Copy the raw opcodes from all your different cheat files and paste them together into the center **Opcodes** panel.
-2.  **Disassemble:** The tool will automatically disassemble the combined opcodes and display the human-readable result in the right **Disassembler** panel.
-3.  **Copy to Assembler:** Copy the entire output from the **Disassembler** panel and paste it into the left **Assembler** panel.
-
-Once completed, you can edit all of your cheats in one place and use the **“Relocate All”** tool to ensure they work together without conflicts.
-
 ## Code Cave and Relocation Workflow
 
-Using a "code cave" is the most robust method for applying complex cheats. It involves finding unused memory space, placing your custom code there, and then diverting the game's execution to your code and back again. This section explains the core concepts and the workflow for using Cheat Code Commander's powerful relocation tools.
+A "code cave" is a region of unused memory within a game. Using a code cave for your cheats is the best way to prevent them from conflicting with the game's code or with each other. Cheat Code Commander provides a powerful workflow for finding and using code caves.
 
-### Understanding the Core Concepts
+### Step 1: What is a Code Cave?
 
-Before you begin, it's crucial to understand these concepts:
+A code cave is a region of unused memory within a game's executable or memory dump. These areas are typically filled with zeroes or placeholder instructions (`udf`). They provide a safe space to insert custom code without overwriting important game logic.
 
-#### Free Code Space
+### Step 2: How to Identify a Code Cave
 
-Custom cheat code can only be placed within a **code segment** of the game's memory. These segments are allocated in 4 kilobyte (4KB) blocks. Since a game's actual code rarely fills a block perfectly, there is usually unused space at the end of the segment. This space is filled with `00` bytes and is referred to as **Free Code Space**.
+You can use the **Disassembler** to find potential code caves:
 
-To find it, you must use an external tool like a hex editor to look at the end of the game's code segment and move backwards until you find non-zero code. The size of this space is determined by the distance between the end of the legitimate code and the 4KB boundary. As a rule of thumb, the last four hex digits of the address at the very end of the free code space block is often `FFF`. The lower the starting address of the free space, the more room you have for your cheats.
+1.  Open a memory dump in the disassembler.
+2.  Look for large, contiguous blocks of `udf #0` or `00000000` opcodes. These patterns indicate unused space.
 
-#### Code Caves & Hooks
+### Step 3: Set the Code Cave Location
 
-A **Code Cave** is a specific location *within* the Free Code Space that you choose to write your custom cheat logic (your "hack").
+Once you've found a suitable code cave, you need to tell Cheat Code Commander where it is.
 
-A **Hook** is the mechanism that activates your code cave. It works by replacing a piece of the original game's code with a **branch instruction**. This branch redirects the game's execution to your code cave. After your custom instructions run, you must add a final branch instruction to return to the original game code, allowing the game to continue as normal.
+1.  In the disassembler's output, right-click the line containing the **starting address** of the code cave.
+2.  Select **“Set as Free Code Start”** from the context menu.
+3.  This action will automatically populate the **“Free Code Start”** field in the assembler window.
 
-**Hazard Warning:** Different cheat authors may build their code caves in different ways. Some start from the top of the free space and build down, while others start from the bottom and build up. When you mix cheats from multiple authors, their code caves can overwrite each other. This is a primary cause of game crashes, making careful management of your code cave space critical. Cheat Code Commander's **“Relocate All”** tool is designed to solve this exact problem.
+### Step 4: Relocate Your Cheats
 
-### Workflow: Finding and Using a Code Cave
+With the code cave location set, you can now move all your cheats into it with a single click.
 
-Here is the recommended workflow for using code caves in Cheat Code Commander:
+1.  Switch to the **Assembler** window.
+2.  Click the **“Relocate All”** button.
 
-#### Step 1: Find the Free Code Space
-
-Using a hex editor or memory viewer, inspect the game's memory dump to find a suitable region of Free Code Space as described above. Identify the starting address of the large block of `00` bytes you wish to use.
-
-#### Step 2: Set the Code Cave Start Address
-
-Once you've found a suitable starting address, you need to tell Cheat Code Commander where it is.
-
-1.  In the assembler window, manually enter the address you found into the **“Free Code Start”** text field.
-2.  Alternatively, you can find and set the start address from an existing cheat file:
-    *   First, ensure the cheats are loaded into the **Assembler** panel (left), as this is the only panel processed by the relocation tools. You can use the "Consolidating Cheats from Opcodes" workflow described in the previous section to do this.
-    *   In the **Assembler** panel, look for the hooks. These are typically `b` (branch) instructions that jump from a low address (the game's original code) to a high address (the code cave).
-    *   Examine all such branches and find the lowest of these high addresses. This is the starting point of the existing code caves.
-    *   In the **Assembler** panel, right-click the line that contains this lowest address and select **“Set as Free Code Start”** from the context menu.
-
-#### Step 3: Relocate Your Cheats
-
-With the **“Free Code Start”** location set, click the **“Relocate All”** button.
-The tool will automatically rewrite all your cheats to reside sequentially in the specified code cave, preventing collisions and ensuring that your cheats work together seamlessly.
+The tool will automatically handle the rest, safely rewriting all your cheats to reside in the specified code cave. This prevents collisions and ensures that your cheats work together seamlessly.

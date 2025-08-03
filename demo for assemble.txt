@@ -1,0 +1,71 @@
+# Asm cheats & Staic cheats
+[Main+R0+0x123456] = 0x1E200001  mov x1, #1
+[Main+R0+0x123456] = 0x1E200001  mov x1, #4
+[Main+R0+0x12345A] = nop; nop
+[Main+R0+0x12345E] = .word 0xDEADBEEF
+[Main+R0+0x123462] = .float 3.14
+
+# Standard conditional
+if [Main+0xABCDEF0] == 1
+[Main+R0+0x123456] = 0xDEADBEEF
+else
+[Main+R0+0x123456] = 0
+endif
+
+# Register conditional
+if R1 > 100
+R2 = 1
+endif
+
+# Executes every frame the L and R buttons are held
+if keyheld L + R
+  [Main+R0+0x123456] = 0xDEADBEEF
+endif
+
+# Executes once when the A button is first pressed
+if keydown A
+  R1 = R1 + 1
+endif
+
+# Write 0 to 10 memory locations
+R1 = 0
+loop start R2 = 10
+  [R0]! = R1 # The '!' increments R0 by the write width (default 4).
+             # Note: Auto-increment is only supported when storing a register,
+             # or for static value writes to a simple register address (e.g. [R1]!).
+             # It is NOT supported for static writes to complex addresses (e.g. [Main+R1+0x100]!).
+loop stop R2
+
+# Load a static value into R1
+R1 = 0x100
+
+# Load a value from memory into R2
+R2 = [Main+0xABCDEF0] W=4
+R2 = [Main+R15+0x000ABCDEF0] W=4
+R2 = [R15+0xABCDEF0] W=4
+R2 = [R2+0xABCDEF0] W=4
+
+# Math to R1
+R1 = R5 + 123
+R1 = R1 + R2
+R1 = R2 + 0x5776889990079966 W=8
+R1 = R2 - 0x57768899
+R1 = R2 * 0x5776889990079966 W=8
+R1 = R2 << 5
+R1 = R2 >> 5
+R1 = R2 & 5
+R1 = R2 | 5
+R1 = !R2
+R1 = R2 XOR R4
+R1 = R5
+R1 = R2 fadd R3
+R1 = R2 fsub R3
+R1 = R2 fmul R3
+R1 = R2 fdiv R3
+
+# Store the result
+[Main+0xABCDEF4] = R1
+
+
+
+

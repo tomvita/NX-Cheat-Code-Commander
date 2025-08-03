@@ -1,0 +1,33 @@
+# Cheat Code Commander Examples
+
+[Example 1: God Mode]
+# This cheat writes a new health value to a static memory address.
+# It also demonstrates using assembly instructions directly.
+[Main+R0+0x100100] = 0x3E7 # Set health to 999
+[Main+R0+0x100104] = mov x1, #1 # Move the value 1 into register x1
+
+[Example 2: Infinite Ammo]
+# This cheat uses a .word directive to write a 32-bit value.
+[Main+R0+0x200200] = .word 0xFFFFFFFF # Max ammo
+
+[Example 3: Custom Item]
+# This demonstrates using .float for floating point values
+# and .byte for single byte values.
+[Main+R0+0x300300] = .float 99.9
+[Main+R0+0x300304] = .byte 0x0A
+
+[Example 4: Pointer-based Writing]
+# Auto-incrementing a pointer register after a write.
+[R10] = 0xCAFEBABE W=4 R10+
+
+[Example 5: Conditional Cheats]
+# Only activate the cheat if a certain condition is met.
+if [Main+0x400400] == 1
+  [Main+R0+0x500500] = 1
+endif
+
+[Example 6: Keypress Activated Cheat]
+# Activate cheat by holding down L+R buttons.
+if keyheld L + R
+  R1 = 1
+endif
