@@ -4,7 +4,7 @@
 
 Welcome to Cheat Code Commander, the definitive tool for PC power-users to compose, combine, and customize cheat codes. This application is designed to read, write, and understand cheat code from multiple authors in a human-friendly format, allowing you to tailor your gaming experience like never before.
 
-This guide will walk you through every aspect of the tool, from its core features and user interface to advanced techniques like code cave relocation.
+This guide will walk you through every aspect of the tool, from its core features and user interface to advanced techniques like code cave relocation. For a detailed guide on creating cheats from scratch, please see the [ASM Cheat Creation Guide](asm_cheat_creation_guide.md).
 
 ## Getting Started: A Quick Guide
 
@@ -63,6 +63,7 @@ To improve navigation and streamline your workflow, synchronized scrolling and c
 
 *   **Click to Sync:** A left-click on a cheat's title in any of the main text panels (Assembler, Opcode, or Disassembly) or the logs will now automatically scroll all other panels to display the corresponding cheat. If you click within the body of a cheat and its title is not currently visible, the panel will automatically scroll to bring the title into view before synchronizing. This ensures you never lose context.
 *   **Highlighting:** The clicked cheat name will be highlighted in yellow for two seconds, making it easy to spot.
+*   **Double-Click to Highlight:** You can now double-click on text in the assembly editor to highlight all instances of that text, making it easier to track references and usages.
 
 ## The Assembler: Power and Precision
 
@@ -194,6 +195,12 @@ Cheat Code Commander includes several advanced features to streamline your workf
 ### The ASM Editor
 
 The ASM Editor provides a focused environment for writing and editing ARM64 assembly code. You can add/delete lines, define labels, and use standard Keystone data directives (`.word`, `.float`, etc.).
+
+A new context menu has been added to the assembly editor, providing quick access to common templates to create a cheat from scratch:
+
+*   **Easy hack template:** This template is designed for simple value modifications. It works with `ldr` and `str` instructions and allows you to easily change the value being loaded or stored.
+*   **Use branch to code cave template:** This template replaces the selected instruction with a branch to a new code cave. This allows you to write more complex assembly code without having to worry about overwriting existing game code.
+*   **Use branch to code cave template with push to stack:** This template is similar to the "branch to code cave" template, but it also includes instructions to save and restore registers `X25` and `X26`. This is useful when you need to use these registers in your code cave without interfering with the game's normal execution.
 
 ### Cut and Paste Cheats
 
