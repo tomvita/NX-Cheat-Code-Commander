@@ -198,7 +198,7 @@ The ASM Editor provides a focused environment for writing and editing ARM64 asse
 
 A new context menu has been added to the assembly editor, providing quick access to common templates to create a cheat from scratch:
 
-*   **Easy hack template:** This template is designed for simple value modifications. It works with `ldr` and `str` instructions and allows you to easily change the value being loaded or stored.
+*   **Easy hack template:** Automates the creation of a complete code cave for a single instruction. It generates a hook, finds a free memory location, preserves the original instruction, and sets up the return jump, letting you focus immediately on the core logic (e.g., changing a value). For a detailed example, see the [ASM Cheat Creation Guide](asm_cheat_creation_guide.md).
 *   **Use branch to code cave template:** This template replaces the selected instruction with a branch to a new code cave. This allows you to write more complex assembly code without having to worry about overwriting existing game code.
 *   **Use branch to code cave template with push to stack:** This template is similar to the "branch to code cave" template, but it also includes instructions to save and restore registers `X25` and `X26`. This is useful when you need to use these registers in your code cave without interfering with the game's normal execution.
 
