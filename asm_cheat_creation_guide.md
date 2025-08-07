@@ -12,24 +12,28 @@ Here is the final cheat in its two common forms:
 
 **1. Human-Readable Assembly**
 ```asm
-// Define a new location for our code cave
+// This is the main section where we hook the game code.
+// We replace the original instruction with a jump to our code cave.
+[main]
+0x8754EC: b 0x982DB0 // Jump to our new code
+
+// This defines the start of our new code block in a free memory region.
 cave_start = 0x982DB0
 
-// Load the max gold value (99,999,999) into register w21.
+// --- Start of Code Cave Logic ---
+
+// Load our desired value (99,999,999) into the target register 'w21'.
 ldr w21, max_gold
 
-// Execute the original instruction we overwrote.
+// Execute the original instruction we overwrote. This is critical.
 str w21, [x19, #0x49c]
 
-// Jump back to the original code flow.
+// Return to the normal game flow.
 b 0x8754F0
 
-// Data label for our max gold value.
+// Define the data for our 'max_gold' label. The assembler will
+// place this value in memory for the 'ldr' instruction to access.
 max_gold: .word 99999999
-
-// The main hook that replaces the original game code.
-[main]
-0x8754EC: b 0x982DB0
 ```
 
 **2. Machine-Readable Raw Code**
@@ -66,33 +70,34 @@ Since we need to insert our own logic, we must create a **code cave**—a separa
     [code that change gold]
     040A0000 008754EC B9049E75
     ```
-    The disassembler output will give you 
-  ```
+    The disassembler output will give you:
+    ```
     [code that change gold]
     [Main+R10+0x00008754EC] = 0xB9049E75  str w21, [x19, #0x49c]
-  ```
-    **Copy to Assembler input:** Copy disassembler output to Assember input window. This recreates the editable cheat assembly source in the assembler. This is the starting point to create your target cheat.
+    ```
+    **Copy to Assembler input:** Copy the disassembler output to the Assembler input window. This recreates the editable cheat assembly source in the assembler. This is the starting point to create your target cheat.
+
 2.  **Enter Edit Mode:** Right-click the code in the assembler input and select the context menu item **"Edit ASM"**.
 
-2.  **Build the Hook:** In the assembler panel, create a hook that redirects the game's execution. You'll replace the original instruction at `0x8754EC` with a branch (`b`) to a free memory location (your future code cave).
+3.  **Build the Hook:** In the assembler panel, create a hook that redirects the game's execution. You'll replace the original instruction at `0x8754EC` with a branch (`b`) to a free memory location (your future code cave).
     ```asm
-    cave_start = 0x8754EC
-    m_8754ec: b 0x982DB0 // Jump to our new code
+    [main]
+    0x8754EC: b 0x982DB0 // Jump to our new code
     ```
 
-3.  **Write the Code Cave Logic:** Now, create the code cave itself.
+4.  **Write the Code Cave Logic:** Now, create the code cave itself.
     *   Define a new `cave_start` at your chosen location (`0x982DB0`).
     *   Load your desired value into the register (`ldr w21, max_gold`).
     *   Execute the original instruction you overwrote (`str w21, [x19, #0x49c]`).
-    *   Jump back to the instruction *after* the hook to resume normal game flow (`b m_8754ec + 4`).
+    *   Jump back to the instruction *after* the hook to resume normal game flow (`b 0x8754F0`).
     *   Define your data (`max_gold: .word 99999999`).
 
-4.  **The Final Code:** Here is the complete, manually-crafted code you would write in the assembler panel:
+5.  **The Final Code:** Here is the complete, manually-crafted code you would write in the assembler panel:
     ```asm
     // This is the main section where we hook the game code.
     // We replace the original instruction with a jump to our code cave.
-    cave_start = 0x8754EC
-    m_8754ec: b 0x982DB0 // Jump to our new code
+    [main]
+    0x8754EC: b 0x982DB0 // Jump to our new code
 
     // This defines the start of our new code block in a free memory region.
     cave_start = 0x982DB0
@@ -105,9 +110,8 @@ Since we need to insert our own logic, we must create a **code cave**—a separa
     // Execute the original instruction we overwrote. This is critical.
     str w21, [x19, #0x49c]
 
-    // Return to the normal game flow. The `m_8754ec` label gives us a
-    // convenient way to calculate the return address (the instruction after our hook).
-    b m_8754ec + 4
+    // Return to the normal game flow.
+    b 0x8754F0
 
     // Define the data for our 'max_gold' label. The assembler will
     // place this value in memory for the 'ldr' instruction to access.
@@ -118,7 +122,7 @@ After assembling this code, you will have successfully created the "Max Gold" ch
 
 > **🤖 Pro Tip: Automate with Templates**
 >
-> Once you are comfortable with the manual process, you can speed up your workflow using templates. In the ASM Editor, right-clicking the hook instruction (`m_8754ec: str w21, [x19, #0x49c]`) and choosing **Easy Hack Template** automates the code cave creation, letting you focus on the core logic.
+> Once you are comfortable with the manual process, you can speed up your workflow using templates. In the ASM Editor, right-clicking the hook instruction (`0x8754EC: str w21, [x19, #0x49c]`) and choosing **Easy Hack Template** automates the code cave creation, letting you focus on the core logic.
 
 ---
 
@@ -138,14 +142,14 @@ You'll often find cheats online in their raw, machine-readable format. For our e
 040A0000 00982DBC 05F5E0FF
 ```
 
-### Step 2: Disassemble the Raw Code
-1.  **Disassemble:** Paste the raw opcodes into the **opcode panel** (center). The disassembler on the right will automatically convert it into human-readable assembly.
+### Step 2: Disassemble and Prepare for Editing
 
-### Step 2.2: Prepare the Cheat for Editing
-1.  **Copy to Assembler:** Right-click the disassembled code in the right panel and select **"Copy to left panel"**. This recreates the editable cheat source in the assembler. This is the starting point to create your target cheat.
-2.  **Enter Edit Mode:** Right-click the code in the assembler (left panel) and select the context menu item **"Edit ASM"**.
+1.  **Disassemble:** Paste the raw opcodes into the **opcode panel** (center). The disassembler on the right will automatically convert it into human-readable assembly.
+2.  **Copy to Assembler:** Right-click the disassembled code in the right panel and select **"Copy to left panel"**. This recreates the editable cheat source in the assembler.
+3.  **Enter Edit Mode:** Right-click the code in the assembler (left panel) and select the context menu item **"Edit ASM"**.
 
 ### Step 3: Modify the Logic
+
 Once the code is in the dedicated editor, you can make your changes.
 *   **For simple value changes,** you can edit the assembly directly in the assembler panel (e.g., changing `.word 99999999` to `.word 500`).
 *   **For more complex changes,** you can add new instructions, use labels for clarity, and restructure the cheat's logic. You can also create a new variant to preserve the original cheat.
