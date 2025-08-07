@@ -66,7 +66,13 @@ Since we need to insert our own logic, we must create a **code cave**—a separa
     [code that change gold]
     040A0000 008754EC B9049E75
     ```
-    The disassembler will show you `str w21, [x19, #0x49c]`.
+    The disassembler output will give you 
+  ```
+    [code that change gold]
+    [Main+R10+0x00008754EC] = 0xB9049E75  str w21, [x19, #0x49c]
+  ```
+    **Copy to Assembler input:** Copy disassembler output to Assember input window. This recreates the editable cheat assembly source in the assembler. This is the starting point to create your target cheat.
+2.  **Enter Edit Mode:** Right-click the code in the assembler input and select the context menu item **"Edit ASM"**.
 
 2.  **Build the Hook:** In the assembler panel, create a hook that redirects the game's execution. You'll replace the original instruction at `0x8754EC` with a branch (`b`) to a free memory location (your future code cave).
     ```asm
@@ -132,17 +138,19 @@ You'll often find cheats online in their raw, machine-readable format. For our e
 040A0000 00982DBC 05F5E0FF
 ```
 
-### Step 2: Disassemble and Modify
-
+### Step 2: Disassemble the Raw Code
 1.  **Disassemble:** Paste the raw opcodes into the **opcode panel** (center). The disassembler on the right will automatically convert it into human-readable assembly.
 
-2.  **Recreate the Source:** Right-click the disassembled code and select **"Copy to left panel"**. This recreates the editable cheat source in the assembler, giving you a clear foundation to work from.
+### Step 2.2: Prepare the Cheat for Editing
+1.  **Copy to Assembler:** Right-click the disassembled code in the right panel and select **"Copy to left panel"**. This recreates the editable cheat source in the assembler. This is the starting point to create your target cheat.
+2.  **Enter Edit Mode:** Right-click the code in the assembler (left panel) and select the context menu item **"Edit ASM"**.
 
-3.  **Modify the Logic:**
-    *   **For simple value changes,** you can edit the assembly directly in the assembler panel (e.g., changing `.word 99999999` to `.word 500`).
-    *   **For more complex changes,** right-click the code and select **"Edit ASM"**. This opens a dedicated editor where you can add new instructions, use labels for clarity, and restructure the cheat's logic. You can also create a new variant to preserve the original cheat.
+### Step 3: Modify the Logic
+Once the code is in the dedicated editor, you can make your changes.
+*   **For simple value changes,** you can edit the assembly directly in the assembler panel (e.g., changing `.word 99999999` to `.word 500`).
+*   **For more complex changes,** you can add new instructions, use labels for clarity, and restructure the cheat's logic. You can also create a new variant to preserve the original cheat.
 
-### Step 3: Expand the Cheat with "Relocate All"
+### Step 4: Expand the Cheat with "Relocate All"
 
 What if your new logic requires more space than the original code cave provides?
 
