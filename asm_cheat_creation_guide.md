@@ -120,9 +120,39 @@ Since we need to insert our own logic, we must create a **code cave**—a separa
 
 After assembling this code, you will have successfully created the "Max Gold" cheat from scratch.
 
-> **🤖 Pro Tip: Automate with Templates**
+> **🤖 Pro Tip: Automate with the "Easy Hack Template"**
 >
-> Once you are comfortable with the manual process, you can speed up your workflow using templates. In the ASM Editor, right-clicking the hook instruction (`0x8754EC: str w21, [x19, #0x49c]`) and choosing **Easy Hack Template** automates the code cave creation, letting you focus on the core logic.
+> Once you are comfortable with the manual process, you can significantly speed up your workflow. The **Easy Hack Template** automates the entire code cave creation process.
+>
+> **How it Works:**
+>
+> 1.  In the ASM Editor, right-click the single instruction you want to hook (e.g., `str w21, [x19, #0x49c]`).
+> 2.  Select **"Easy Hack Template"** from the context menu.
+>
+> The tool will automatically transform that single line into a complete, ready-to-edit code cave structure.
+>
+> **Before:**
+> ```asm
+> cave_start = 0x8754EC
+> m_8754ec: str w21, [x19, #0x49c]
+> ```
+>
+> **After:**
+> ```asm
+> cave_start = 0x8754EC
+> m_8754ec: str w21, [x19, #0x49c]
+> m_8754ec: b 0x11E28928 // Patched with a jump to the new cave
+> //
+>
+> cave_start = 0x11E28928 // A new code cave is created
+> ldr w21, a             // Template code to load a new value
+> original: str w21, [x19, #0x49c] // The original instruction is preserved
+> return:
+> b m_8754ec + 4         // Jump back to the original code flow
+> a: .word 100           // A placeholder value for you to change
+> ```
+>
+> This automation handles the boilerplate—creating the jump, finding a free memory location, preserving the original instruction, and setting up the return jump—letting you focus immediately on the core cheat logic (like changing the `.word` value).
 
 ---
 
